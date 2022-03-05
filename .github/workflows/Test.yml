@@ -28,9 +28,9 @@ jobs:
         run: npm install
 
       - uses: ./
-        id: steup-keychain
+        id: setup-temporary-keychain
 
       - name: Output result
         run: |
-          echo "Keychain Path => ${{ steps.steup-keychain.outputs.keychain-path }}"
-          echo "Keychain Password => ${{ steps.steup-keychain.outputs.keychain-password }}"
+          echo "Keychain Path => ${{ steps.setup-temporary-keychain.outputs.keychain-path }}"
+          echo "Keychain Password => ${{ steps.setup-temporary-keychain.outputs.keychain-password }}"
