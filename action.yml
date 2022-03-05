@@ -1,0 +1,43 @@
+name: 'Setup Temporary Keychain GitHub action'
+description: 'Create a new temporary keychain that is valid in the workflow'
+inputs:
+  name:
+    description: 'The name for temporary keychain.'
+    required: false
+    default: ''
+  password:
+    description: 'The password for temporary keychain.'
+    required: false
+    default: ''
+  timeout:
+    description: 'Specify timeout interval in seconds.'
+    required: false
+    default: '21600'
+  unlock:
+    description: 'Unlock the keychain you created? Default is true.'
+    required: false
+    default: true
+  default-keychain:
+    description: 'Set as default keychain? Default is true.'
+    required: false
+    default: true
+  login-keychain:
+    description: 'Set as login keychain? Default is false.'
+    required: false
+    default: false
+  list-keychains:
+    description: 'Set as lists keychain? Default is false.'
+    required: false
+    default: false
+outputs:
+  keychain-path:
+    description: 'The file path for temporary keychain.'
+  keychain-password:
+    description: 'The password for temporary keychain.'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
+branding:
+  icon: "upload-cloud"
+  color: "orange"
