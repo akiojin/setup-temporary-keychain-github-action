@@ -7423,7 +7423,7 @@ class Security {
     }
     static UnlockKeychain(keychain, password) {
         if (password == null) {
-            throw new Error('Password required.');
+            throw new Error('UnlockKeychain: Password required.');
         }
         if (keychain != null) {
             return exec.exec('security', ['unlock-keychain', '-p', password, keychain]);
@@ -7434,7 +7434,7 @@ class Security {
     }
     static CreateKeychain(keychain, password) {
         if (password === '') {
-            throw new Error('Password required.');
+            throw new Error('CreaterKeychain: Password required.');
         }
         return exec.exec('security', ['create-keychain', '-p', password, keychain]);
     }
@@ -7516,7 +7516,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.StateHelper = void 0;
+exports.BooleanStateValue = exports.StringStateValue = exports.StateHelper = void 0;
 const coreCommand = __importStar(__nccwpck_require__(604));
 class StateHelper {
     static Set(key, value) {
@@ -7527,6 +7527,32 @@ class StateHelper {
     }
 }
 exports.StateHelper = StateHelper;
+class StringStateValue {
+    constructor(key) {
+        this.key = '';
+        this.key = key;
+    }
+    Set(value) {
+        StateHelper.Set(this.key, value);
+    }
+    Get() {
+        return StateHelper.Get(this.key);
+    }
+}
+exports.StringStateValue = StringStateValue;
+class BooleanStateValue {
+    constructor(key) {
+        this.key = '';
+        this.key = key;
+    }
+    Set(value) {
+        StateHelper.Set(this.key, value.toString());
+    }
+    Get() {
+        return !!StateHelper.Get(this.key);
+    }
+}
+exports.BooleanStateValue = BooleanStateValue;
 
 
 /***/ }),
@@ -7574,29 +7600,32 @@ const os = __importStar(__nccwpck_require__(37));
 const tmp = __importStar(__nccwpck_require__(729));
 const Security_1 = __nccwpck_require__(11);
 const StateHelper_1 = __nccwpck_require__(968);
-const IsPost = !!StateHelper_1.StateHelper.Get('POST');
 const IsMacOS = os.platform() === 'darwin';
+const PostProcess = new StateHelper_1.BooleanStateValue('IS_POST_PROCESS');
+const Keychain = new StateHelper_1.StringStateValue('KEYCHAIN');
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const name = core.getInput('name');
-            const password = core.getInput('password') || Math.random().toString(36);
-            const timeout = +core.getInput('timeout');
-            core.setSecret(password);
+            const keychainName = core.getInput('keychain-name');
+            const keychainPassword = core.getInput('keychain-password') || Math.random().toString(36);
+            const keychainTimeout = +core.getInput('keychain-timeout');
+            core.setSecret(keychainPassword);
             let keychain = '';
-            if (name === '') {
+            if (keychainName === '') {
                 keychain = `${tmp.tmpNameSync()}.keychain-db`;
             }
             else {
-                keychain = `${process.env.HOME}/Library/Keychains/${name}.keychain-db`;
+                keychain = `${process.env.HOME}/Library/Keychains/${keychainName}.keychain-db`;
             }
-            StateHelper_1.StateHelper.Set('KEYCHAIN_PATH', keychain);
-            core.setOutput('keychain-path', keychain);
-            core.setOutput('keychain-password', password);
-            yield Security_1.Security.CreateKeychain(keychain, password);
-            yield Security_1.Security.SetKeychainTimeout(keychain, timeout);
+            core.info('setup-temporary-keychain parameters:');
+            core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`);
+            Keychain.Set(keychain);
+            core.setOutput('keychain', keychain);
+            core.setOutput('keychain-password', keychainPassword);
+            yield Security_1.Security.CreateKeychain(keychain, keychainPassword);
+            yield Security_1.Security.SetKeychainTimeout(keychain, keychainTimeout);
             if (!!core.getBooleanInput('unlock')) {
-                yield Security_1.Security.UnlockKeychain(keychain, password);
+                yield Security_1.Security.UnlockKeychain(keychain, keychainPassword);
             }
             if (!!core.getBooleanInput('default-keychain')) {
                 yield Security_1.Security.SetDefaultKeychain(keychain);
@@ -7620,7 +7649,7 @@ function Cleanup() {
     return __awaiter(this, void 0, void 0, function* () {
         core.info('Cleanup');
         try {
-            yield Security_1.Security.DeleteKeychain(StateHelper_1.StateHelper.Get('KEYCHAIN_PATH'));
+            yield Security_1.Security.DeleteKeychain(Keychain.Get());
         }
         catch (ex) {
             core.setFailed(ex.message);
@@ -7631,13 +7660,13 @@ if (!IsMacOS) {
     core.setFailed('Action requires macOS agent.');
 }
 else {
-    if (!!IsPost) {
+    if (!!PostProcess.Get()) {
         Cleanup();
     }
     else {
         Run();
     }
-    StateHelper_1.StateHelper.Set('POST', 'true');
+    PostProcess.Set(true);
 }
 
 
