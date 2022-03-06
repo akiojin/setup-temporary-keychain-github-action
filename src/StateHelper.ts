@@ -12,3 +12,43 @@ export class StateHelper
 		return process.env[`STATE_${key}`] || '';
 	}
 }
+
+export class StringStateValue
+{
+	key: string = '';
+
+	constructor(key: string)
+	{
+		this.key = key
+	}
+
+	Set(value: string)
+	{
+		StateHelper.Set(this.key, value)
+	}
+
+	Get(): string
+	{
+		return StateHelper.Get(this.key)
+	}
+}
+
+export class BooleanStateValue
+{
+	key: string = '';
+
+	constructor(key: string)
+	{
+		this.key = key
+	}
+
+	Set(value: Boolean)
+	{
+		StateHelper.Set(this.key, value.toString())
+	}
+
+	Get(): Boolean
+	{
+		return !!StateHelper.Get(this.key)
+	}
+}

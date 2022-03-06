@@ -2,37 +2,42 @@ import * as core from '@actions/core'
 import * as os from 'os'
 import * as tmp from 'tmp'
 import { Security } from './Security'
-import { StateHelper } from './StateHelper';
+import { BooleanStateValue, StringStateValue } from './StateHelper'
 
-const IsPost = !!StateHelper.Get('POST')
 const IsMacOS = os.platform() === 'darwin'
+
+const PostProcess = new BooleanStateValue('IS_POST_PROCESS')
+const Keychain = new StringStateValue('KEYCHAIN')
 
 async function Run()
 {
 	try {
-		const name: string = core.getInput('name')
-		const password: string = core.getInput('password') || Math.random().toString(36)
-		const timeout: number = +core.getInput('timeout')
+		const keychainName: string = core.getInput('keychain-name')
+		const keychainPassword: string = core.getInput('keychain-password') || Math.random().toString(36)
+		const keychainTimeout: number = +core.getInput('keychain-timeout')
 
-		core.setSecret(password)
+		core.setSecret(keychainPassword)
 
 		let keychain = ''
 
-		if (name === '') {
+		if (keychainName === '') {
 			keychain = `${tmp.tmpNameSync()}.keychain-db`
 		} else {
-			keychain = `${process.env.HOME}/Library/Keychains/${name}.keychain-db`
+			keychain = `${process.env.HOME}/Library/Keychains/${keychainName}.keychain-db`
 		}
 
-		StateHelper.Set('KEYCHAIN_PATH', keychain)
-		core.setOutput('keychain', keychain)
-		core.setOutput('keychain-password', password)
+		core.info('setup-temporary-keychain parameters:')
+		core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`)
 
-		await Security.CreateKeychain(keychain, password)
-		await Security.SetKeychainTimeout(keychain, timeout)
+		Keychain.Set(keychain)
+		core.setOutput('keychain', keychain)
+		core.setOutput('keychain-password', keychainPassword)
+
+		await Security.CreateKeychain(keychain, keychainPassword)
+		await Security.SetKeychainTimeout(keychain, keychainTimeout)
 
 		if (!!core.getBooleanInput('unlock')) {
-			await Security.UnlockKeychain(keychain, password)
+			await Security.UnlockKeychain(keychain, keychainPassword)
 		}
 
 		if (!!core.getBooleanInput('default-keychain')) {
@@ -58,7 +63,7 @@ async function Cleanup()
 	core.info('Cleanup')
 
 	try {
-		await Security.DeleteKeychain(StateHelper.Get('KEYCHAIN_PATH'))
+		await Security.DeleteKeychain(Keychain.Get())
 	} catch (ex: any) {
 		core.setFailed(ex.message)
 	}
@@ -67,11 +72,11 @@ async function Cleanup()
 if (!IsMacOS) {
 	core.setFailed('Action requires macOS agent.')
 } else {
-	if (!!IsPost) {
+	if (!!PostProcess.Get()) {
 		Cleanup()
 	} else {
 		Run()
 	}
 	
-	StateHelper.Set('POST', 'true')
+	PostProcess.Set(true)
 }

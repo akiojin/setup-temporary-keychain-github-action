@@ -1,15 +1,15 @@
 name: 'Setup Temporary Keychain GitHub action'
 description: 'Create a new temporary keychain that is valid in the workflow'
 inputs:
-  name:
+  keychain-name:
     description: 'The name for temporary keychain.'
     required: false
     default: ''
-  password:
+  keychain-password:
     description: 'The password for temporary keychain.'
     required: false
     default: ''
-  timeout:
+  keychain-timeout:
     description: 'Specify timeout interval in seconds.'
     required: false
     default: '21600'

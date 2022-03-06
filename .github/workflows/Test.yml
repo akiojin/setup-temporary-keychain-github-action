@@ -32,5 +32,5 @@ jobs:
 
       - name: Output result
         run: |
-          echo "Keychain Path => ${{ steps.setup-temporary-keychain.outputs.keychain-path }}"
+          echo "Keychain Path => ${{ steps.setup-temporary-keychain.outputs.keychain }}"
           echo "Keychain Password => ${{ steps.setup-temporary-keychain.outputs.keychain-password }}"
