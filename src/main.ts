@@ -25,7 +25,7 @@ async function Run()
 		}
 
 		StateHelper.Set('KEYCHAIN_PATH', keychain)
-		core.setOutput('keychain-path', keychain)
+		core.setOutput('keychain', keychain)
 		core.setOutput('keychain-password', password)
 
 		await Security.CreateKeychain(keychain, password)
