@@ -25,8 +25,10 @@ inputs:
     description: 'Set as login keychain? Default is false.'
     required: false
     default: false
-  list-keychains:
-    description: 'Set as lists keychain? Default is false.'
+  append-keychain:
+    description: >
+      Add to the default login keychain.
+      Default is false.
     required: false
     default: false
 outputs:

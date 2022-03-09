@@ -7436,7 +7436,7 @@ class Security {
         if (password === '') {
             throw new Error('CreaterKeychain: Password required.');
         }
-        return exec.exec('security', ['create-keychain', '-p', password, keychain]);
+        return exec.exec('security', ['create-keychain', '-p', `${password}`, keychain]);
     }
     static SetKeychainTimeout(keychain, seconds) {
         return exec.exec('security', ['set-keychain-settings', '-lut', seconds.toString(), keychain]);
@@ -7462,8 +7462,11 @@ class Security {
     static ShowListKeychains() {
         return exec.exec('security', ['list-keychains', '-d', 'user']);
     }
-    static SetListKeychains(keychain) {
+    static SetListKeychain(keychain) {
         return exec.exec('security', ['list-keychains', '-d', 'user', '-s', keychain]);
+    }
+    static SetListKeychains(keychains) {
+        return exec.exec('security', ['list-keychains', '-d', 'user', '-s'].concat(keychains));
     }
     static AllowAccessForAppleTools(keychain, password) {
         const args = [
@@ -7619,23 +7622,31 @@ function Run() {
             }
             core.info('setup-temporary-keychain parameters:');
             core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`);
+            core.startGroup('Create new keychain');
             Keychain.Set(keychain);
             core.setOutput('keychain', keychain);
             core.setOutput('keychain-password', keychainPassword);
             yield Security_1.Security.CreateKeychain(keychain, keychainPassword);
             yield Security_1.Security.SetKeychainTimeout(keychain, keychainTimeout);
+            core.endGroup();
+            core.startGroup('Setup options');
             if (!!core.getBooleanInput('unlock')) {
                 yield Security_1.Security.UnlockKeychain(keychain, keychainPassword);
             }
             if (!!core.getBooleanInput('default-keychain')) {
                 yield Security_1.Security.SetDefaultKeychain(keychain);
+                yield Security_1.Security.SetListKeychain(keychain);
             }
             if (!!core.getBooleanInput('login-keychain')) {
                 yield Security_1.Security.SetLoginKeychain(keychain);
             }
-            if (!!core.getBooleanInput('list-keychains')) {
-                yield Security_1.Security.SetListKeychains(keychain);
+            if (!!core.getBooleanInput('append-keychain')) {
+                yield Security_1.Security.SetListKeychains([
+                    `${process.env.HOME}/Library/Keychains/login.keychain-db`,
+                    keychain
+                ]);
             }
+            core.endGroup();
             yield Security_1.Security.ShowDefaultKeychain();
             yield Security_1.Security.ShowLoginKeychain();
             yield Security_1.Security.ShowListKeychains();

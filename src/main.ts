@@ -29,26 +29,33 @@ async function Run()
 		core.info('setup-temporary-keychain parameters:')
 		core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`)
 
+		core.startGroup('Create new keychain')
 		Keychain.Set(keychain)
 		core.setOutput('keychain', keychain)
 		core.setOutput('keychain-password', keychainPassword)
 
 		await Security.CreateKeychain(keychain, keychainPassword)
 		await Security.SetKeychainTimeout(keychain, keychainTimeout)
+		core.endGroup()
 
+		core.startGroup('Setup options')
 		if (!!core.getBooleanInput('unlock')) {
 			await Security.UnlockKeychain(keychain, keychainPassword)
 		}
-
 		if (!!core.getBooleanInput('default-keychain')) {
 			await Security.SetDefaultKeychain(keychain)
+			await Security.SetListKeychain(keychain)
 		}
 		if (!!core.getBooleanInput('login-keychain')) {
 			await Security.SetLoginKeychain(keychain)
 		}
-		if (!!core.getBooleanInput('list-keychains')) {
-			await Security.SetListKeychains(keychain)
+		if (!!core.getBooleanInput('append-keychain')) {
+			await Security.SetListKeychains([
+				`${process.env.HOME}/Library/Keychains/login.keychain-db`,
+				keychain
+			])
 		}
+		core.endGroup()
 
 		await Security.ShowDefaultKeychain()
 		await Security.ShowLoginKeychain()

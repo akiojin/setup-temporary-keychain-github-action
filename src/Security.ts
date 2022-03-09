@@ -52,7 +52,7 @@ export class Security
 			throw new Error('CreaterKeychain: Password required.')
 		}
 
-		return exec.exec('security', ['create-keychain', '-p', password, keychain])
+		return exec.exec('security', ['create-keychain', '-p', `${password}`, keychain])
 	}
 
 	static SetKeychainTimeout(keychain: string, seconds: number)
@@ -95,9 +95,14 @@ export class Security
 		return exec.exec('security', ['list-keychains', '-d', 'user'])
 	}
 
-	static SetListKeychains(keychain: string): Promise<number>
+	static SetListKeychain(keychain: string): Promise<number>
 	{
 		return exec.exec('security', ['list-keychains', '-d', 'user', '-s', keychain])
+	}
+
+	static SetListKeychains(keychains: string[]): Promise<number>
+	{
+		return exec.exec('security', ['list-keychains', '-d', 'user', '-s'].concat(keychains))
 	}
 
 	static AllowAccessForAppleTools(keychain: string, password: string): Promise<number>

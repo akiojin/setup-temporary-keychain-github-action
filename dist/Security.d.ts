@@ -13,7 +13,8 @@ export declare class Security {
     static SetLoginKeychain(keychain: string): Promise<number>;
     static ShowLoginKeychain(): Promise<number>;
     static ShowListKeychains(): Promise<number>;
-    static SetListKeychains(keychain: string): Promise<number>;
+    static SetListKeychain(keychain: string): Promise<number>;
+    static SetListKeychains(keychains: string[]): Promise<number>;
     static AllowAccessForAppleTools(keychain: string, password: string): Promise<number>;
     static FindGenericPassword(service: string): Promise<number>;
     static ShowCodeSignings(keychain: string): Promise<number>;
