@@ -7606,6 +7606,7 @@ const StateHelper_1 = __nccwpck_require__(968);
 const IsMacOS = os.platform() === 'darwin';
 const PostProcess = new StateHelper_1.BooleanStateValue('IS_POST_PROCESS');
 const Keychain = new StateHelper_1.StringStateValue('KEYCHAIN');
+const DefaultLoginKeychain = `${process.env.HOME}/Library/Keychains/login.keychain-db`;
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -7642,7 +7643,7 @@ function Run() {
             }
             if (!!core.getBooleanInput('append-keychain')) {
                 yield Security_1.Security.SetListKeychains([
-                    `${process.env.HOME}/Library/Keychains/login.keychain-db`,
+                    DefaultLoginKeychain,
                     keychain
                 ]);
             }
@@ -7661,7 +7662,8 @@ function Cleanup() {
         core.info('Cleanup');
         try {
             yield Security_1.Security.DeleteKeychain(Keychain.Get());
-            yield Security_1.Security.SetDefaultKeychain(`${process.env.HOME}/Library/Keychains/login.keychain-db`);
+            yield Security_1.Security.SetDefaultKeychain(DefaultLoginKeychain);
+            yield Security_1.Security.SetListKeychain(DefaultLoginKeychain);
         }
         catch (ex) {
             core.setFailed(ex.message);

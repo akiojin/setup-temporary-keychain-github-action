@@ -9,6 +9,8 @@ const IsMacOS = os.platform() === 'darwin'
 const PostProcess = new BooleanStateValue('IS_POST_PROCESS')
 const Keychain = new StringStateValue('KEYCHAIN')
 
+const DefaultLoginKeychain = `${process.env.HOME}/Library/Keychains/login.keychain-db`
+
 async function Run()
 {
 	try {
@@ -51,7 +53,7 @@ async function Run()
 		}
 		if (!!core.getBooleanInput('append-keychain')) {
 			await Security.SetListKeychains([
-				`${process.env.HOME}/Library/Keychains/login.keychain-db`,
+				DefaultLoginKeychain,
 				keychain
 			])
 		}
@@ -71,7 +73,8 @@ async function Cleanup()
 
 	try {
 		await Security.DeleteKeychain(Keychain.Get())
-		await Security.SetDefaultKeychain(`${process.env.HOME}/Library/Keychains/login.keychain-db`)
+		await Security.SetDefaultKeychain(DefaultLoginKeychain)
+		await Security.SetListKeychain(DefaultLoginKeychain)
 	} catch (ex: any) {
 		core.setFailed(ex.message)
 	}
