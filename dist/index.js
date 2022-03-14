@@ -7661,6 +7661,7 @@ function Cleanup() {
         core.info('Cleanup');
         try {
             yield Security_1.Security.DeleteKeychain(Keychain.Get());
+            yield Security_1.Security.SetDefaultKeychain(`${process.env.HOME}/Library/Keychains/login.keychain-db`);
         }
         catch (ex) {
             core.setFailed(ex.message);

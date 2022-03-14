@@ -71,6 +71,7 @@ async function Cleanup()
 
 	try {
 		await Security.DeleteKeychain(Keychain.Get())
+		await Security.SetDefaultKeychain(`${process.env.HOME}/Library/Keychains/login.keychain-db`)
 	} catch (ex: any) {
 		core.setFailed(ex.message)
 	}
