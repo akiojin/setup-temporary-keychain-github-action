@@ -13,10 +13,10 @@ inputs:
     description: 'Specify timeout interval in seconds.'
     required: false
     default: '21600'
-  unlock:
-    description: 'Unlock the keychain you created? Default is true.'
+  lock-keychain:
+    description: 'Lock the keychain you created? It is unlocked by default.'
     required: false
-    default: true
+    default: false
   default-keychain:
     description: 'Set as default keychain? Default is true.'
     required: false

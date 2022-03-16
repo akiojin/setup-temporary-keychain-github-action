@@ -29,7 +29,8 @@
   "homepage": "https://github.com/akiojin/import-p12_github-action#readme",
   "dependencies": {
     "@actions/core": "^1.6.0",
-    "@actions/exec": "^1.1.0"
+    "@actions/exec": "^1.1.0",
+    "@akiojin/keychain": "^0.1.5"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
