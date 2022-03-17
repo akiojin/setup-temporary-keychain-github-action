@@ -1,6 +1,6 @@
 {
   "name": "setup-temporary-keychain-github-action",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "description": "This action ",
   "main": "dist/index.js",
@@ -30,7 +30,7 @@
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/exec": "^1.1.0",
-    "@akiojin/keychain": "^0.2.3"
+    "@akiojin/keychain": "^0.2.4"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",

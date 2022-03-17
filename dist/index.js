@@ -2702,11 +2702,11 @@ const path = __importStar(__nccwpck_require2_(17));
 const argument_builder_1 = __nccwpck_require2_(582);
 class Keychain {
     static GenerateKeychainPath(keychain) {
-        return path.dirname(keychain) === '' ?
-            `${process.env.HOME}/Library/Keychains/${keychain}.keychain-db` : keychain;
+        const tmp = path.dirname(keychain) === '' ? `${process.env.HOME}/Library/Keychains/${keychain}` : keychain;
+        return path.extname(tmp) === '' ? `${tmp}.keychain-db` : tmp;
     }
     static GetDefaultLoginKeychainPath() {
-        return this.GenerateKeychainPath('login');
+        return this.GenerateKeychainPath('login.keychain-db');
     }
     static async CreateKeychain(keychain, password) {
         if (password === '') {
