@@ -18,38 +18,38 @@ async function Run()
 
 		core.setSecret(keychainPassword)
 
-		const keychain = keychainName === '' ? `${tmp.tmpNameSync()}.keychain-db` : Keychain.GenerateKeychainPath(keychainName)
+		const keychainPath = keychainName === '' ? `${tmp.tmpNameSync()}.keychain-db` : Keychain.GenerateKeychainPath(keychainName)
 
 		core.info('setup-temporary-keychain parameters:')
 		core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`)
 
 		core.startGroup('Create new keychain')
 		{
-			KeychainCache.Set(keychain)
-			core.setOutput('keychain', keychain)
+			KeychainCache.Set(keychainPath)
+			core.setOutput('keychain', keychainPath)
 			core.setOutput('keychain-password', keychainPassword)
 
-			await Keychain.CreateKeychain(keychain, keychainPassword)
-			await Keychain.SetKeychainTimeout(keychain, keychainTimeout)
+			var keychain = await Keychain.CreateKeychain(keychainPath, keychainPassword)
+			await keychain.SetTimeout(keychainTimeout)
 		}
 		core.endGroup()
 
 		core.startGroup('Setup options')
 		{
 			if (!!core.getBooleanInput('lock-keychain')) {
-				await Keychain.LockKeychain(keychain)
+				await keychain.Lock()
 			}
 			if (!!core.getBooleanInput('default-keychain')) {
-				await Keychain.SetDefaultKeychain(keychain)
-				await Keychain.SetListKeychain(keychain)
+				await keychain.SetDefault()
+				await keychain.SetList()
 			}
 			if (!!core.getBooleanInput('login-keychain')) {
-				await Keychain.SetLoginKeychain(keychain)
+				await keychain.SetLogin()
 			}
 			if (!!core.getBooleanInput('append-keychain')) {
 				await Keychain.SetListKeychains([
-					Keychain.GetDefaultLoginKeychain(),
-					keychain
+					Keychain.GetDefaultLoginKeychainPath(),
+					keychainPath
 				])
 			}
 		}
@@ -69,8 +69,8 @@ async function Cleanup()
 
 	try {
 		await Keychain.DeleteKeychain(KeychainCache.Get())
-		await Keychain.SetDefaultKeychain(Keychain.GetDefaultLoginKeychain())
-		await Keychain.SetListKeychain(Keychain.GetDefaultLoginKeychain())
+		await Keychain.SetDefaultKeychain(Keychain.GetDefaultLoginKeychainPath())
+		await Keychain.SetListKeychain(Keychain.GetDefaultLoginKeychainPath())
 	} catch (ex: any) {
 		core.setFailed(ex.message)
 	}

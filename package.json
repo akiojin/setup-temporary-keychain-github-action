@@ -1,6 +1,6 @@
 {
   "name": "import-p12-github-action",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "This action ",
   "main": "dist/index.js",
@@ -30,7 +30,7 @@
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/exec": "^1.1.0",
-    "@akiojin/keychain": "^0.1.5"
+    "@akiojin/keychain": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",
