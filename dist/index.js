@@ -2583,7 +2583,7 @@ class ArgumentBuilder {
         else {
             __classPrivateFieldGet(this, _ArgumentBuilder_args, "f").push(arg);
             if (param != null) {
-                __classPrivateFieldGet(this, _ArgumentBuilder_args, "f").push(arg);
+                __classPrivateFieldGet(this, _ArgumentBuilder_args, "f").push(param);
             }
         }
     }
