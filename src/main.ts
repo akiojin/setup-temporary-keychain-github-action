@@ -38,16 +38,20 @@ async function Run()
 		core.startGroup('Setup options')
 		{
 			if (!!core.getBooleanInput('lock-keychain')) {
+				core.info('lock-keychain')
 				await keychain.Lock()
 			}
 			if (!!core.getBooleanInput('default-keychain')) {
+				core.info('default-keychain')
 				await keychain.SetDefault()
 				await keychain.SetList()
 			}
 			if (!!core.getBooleanInput('login-keychain')) {
+				core.info('login-keychain')
 				await keychain.SetLogin()
 			}
 			if (!!core.getBooleanInput('append-keychain')) {
+				core.info('append-keychain')
 				await Keychain.SetListKeychains([
 					Keychain.GetDefaultLoginKeychainPath(),
 					keychainPath

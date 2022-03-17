@@ -2790,11 +2790,19 @@ class Keychain {
                 output += data.toString();
             }
         };
-        await exec.exec('security', builder.Build(), options);
+        try {
+            await exec.exec('security', builder.Build(), options);
+        }
+        catch (err) {
+            return [];
+        }
         let keychains = [];
         if (output !== '') {
             for (const i of output.split('\n')) {
-                keychains.push(i.trim().replace(/"(.*)"/, '$1'));
+                const tmp = i.trim().replace(/"(.*)"/, '$1');
+                if (tmp !== '') {
+                    keychains.push(i.trim().replace(/"(.*)"/, '$1'));
+                }
             }
         }
         return keychains;
@@ -8104,16 +8112,20 @@ function Run() {
             core.startGroup('Setup options');
             {
                 if (!!core.getBooleanInput('lock-keychain')) {
+                    core.info('lock-keychain');
                     yield keychain.Lock();
                 }
                 if (!!core.getBooleanInput('default-keychain')) {
+                    core.info('default-keychain');
                     yield keychain.SetDefault();
                     yield keychain.SetList();
                 }
                 if (!!core.getBooleanInput('login-keychain')) {
+                    core.info('login-keychain');
                     yield keychain.SetLogin();
                 }
                 if (!!core.getBooleanInput('append-keychain')) {
+                    core.info('append-keychain');
                     yield keychain_1.Keychain.SetListKeychains([
                         keychain_1.Keychain.GetDefaultLoginKeychainPath(),
                         keychainPath
