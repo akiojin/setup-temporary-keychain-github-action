@@ -2696,16 +2696,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const exec = __importStar(__nccwpck_require2_(49));
+const path = __importStar(__nccwpck_require2_(17));
 const argument_builder_1 = __nccwpck_require2_(582);
-const KeychainFile_1 = __importDefault(__nccwpck_require2_(220));
 class Keychain {
-    static GenerateKeychainPath(name) {
-        return `${process.env.HOME}/Library/Keychains/${name}.keychain-db`;
+    static GenerateKeychainPath(keychain) {
+        return path.dirname(keychain) === '' ?
+            `${process.env.HOME}/Library/Keychains/${keychain}.keychain-db` : keychain;
     }
     static GetDefaultLoginKeychainPath() {
         return this.GenerateKeychainPath('login');
@@ -2714,15 +2712,13 @@ class Keychain {
         if (password === '') {
             throw new Error('CreaterKeychain: Password required.');
         }
+        keychain = this.GenerateKeychainPath(keychain);
         const builder = new argument_builder_1.ArgumentBuilder();
         builder.Append('create-keychain');
         builder.Append('-p', password);
         builder.Append(keychain);
         await exec.exec('security', builder.Build());
-        return this.OpenKeychain(keychain);
-    }
-    static OpenKeychain(keychain, password) {
-        return new KeychainFile_1.default(keychain, password);
+        return keychain;
     }
     static ImportCertificateFromFile(keychain, certificate, passphrase) {
         const builder = new argument_builder_1.ArgumentBuilder();
@@ -2782,6 +2778,35 @@ class Keychain {
         builder.Append('delete-keychain');
         builder.Append(keychain);
         return exec.exec('security', builder.Build());
+    }
+    static async GetKeychain(name) {
+        const builder = new argument_builder_1.ArgumentBuilder();
+        builder.Append(name);
+        builder.Append('-d', 'user');
+        let output = '';
+        const options = {};
+        options.listeners = {
+            stdout: (data) => {
+                output += data.toString();
+            }
+        };
+        await exec.exec('security', builder.Build(), options);
+        let keychains = [];
+        if (output !== '') {
+            for (const i of output.split('\n')) {
+                keychains.push(i.trim().replace(/"(.*)"/, '$1'));
+            }
+        }
+        return keychains;
+    }
+    static async GetDefaultKeychain() {
+        return this.GetKeychain('default-keychain');
+    }
+    static async GetLoginKeychain() {
+        return this.GetKeychain('login-keychain');
+    }
+    static async GetListKeychain() {
+        return this.GetKeychain('list-keychains');
     }
     static SetKeychain(name, keychain) {
         const builder = new argument_builder_1.ArgumentBuilder();
@@ -2862,6 +2887,29 @@ exports["default"] = Keychain;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -2878,18 +2926,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _KeychainFile_keychain, _KeychainFile_password;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const path = __importStar(__nccwpck_require2_(17));
+const fs = __importStar(__nccwpck_require2_(292));
 const Keychain_1 = __importDefault(__nccwpck_require2_(577));
 class KeychainFile {
     constructor(keychain, password) {
         _KeychainFile_keychain.set(this, '');
         _KeychainFile_password.set(this, '');
-        __classPrivateFieldSet(this, _KeychainFile_keychain, keychain, "f");
+        __classPrivateFieldSet(this, _KeychainFile_keychain, Keychain_1.default.GenerateKeychainPath(keychain), "f");
         __classPrivateFieldSet(this, _KeychainFile_password, password !== null && password !== void 0 ? password : '', "f");
+    }
+    static async Open(keychain, password) {
+        await fs.access(keychain);
+        return new KeychainFile(keychain, password);
+    }
+    GetPath() {
+        return __classPrivateFieldGet(this, _KeychainFile_keychain, "f");
+    }
+    GetName() {
+        return path.basename(__classPrivateFieldGet(this, _KeychainFile_keychain, "f"));
+    }
+    SetPassword(password) {
+        __classPrivateFieldSet(this, _KeychainFile_password, password, "f");
     }
     async ChangePassword(oldPassword, newPassword) {
         const result = await Keychain_1.default.ChangeKeychainPassword(__classPrivateFieldGet(this, _KeychainFile_keychain, "f"), oldPassword, newPassword);
         if (result === 0) {
-            __classPrivateFieldSet(this, _KeychainFile_password, newPassword, "f");
+            this.SetPassword(newPassword);
         }
         return result;
     }
@@ -2977,6 +3040,14 @@ module.exports = __nccwpck_require__(361);
 
 "use strict";
 module.exports = __nccwpck_require__(147);
+
+/***/ }),
+
+/***/ 292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = __nccwpck_require__(292);
 
 /***/ }),
 
@@ -8025,7 +8096,8 @@ function Run() {
                 KeychainCache.Set(keychainPath);
                 core.setOutput('keychain', keychainPath);
                 core.setOutput('keychain-password', keychainPassword);
-                var keychain = yield keychain_1.Keychain.CreateKeychain(keychainPath, keychainPassword);
+                const path = yield keychain_1.Keychain.CreateKeychain(keychainPath, keychainPassword);
+                var keychain = new keychain_1.KeychainFile(path, keychainPassword);
                 yield keychain.SetTimeout(keychainTimeout);
             }
             core.endGroup();
@@ -8049,9 +8121,15 @@ function Run() {
                 }
             }
             core.endGroup();
-            yield keychain_1.Keychain.ShowDefaultKeychain();
-            yield keychain_1.Keychain.ShowLoginKeychain();
-            yield keychain_1.Keychain.ShowListKeychains();
+            for (const i of yield keychain_1.Keychain.GetDefaultKeychain()) {
+                core.notice(`Default keychain: ${i}`);
+            }
+            for (const i of yield keychain_1.Keychain.GetLoginKeychain()) {
+                core.notice(`Loging keychain: ${i}`);
+            }
+            for (const i of yield keychain_1.Keychain.GetListKeychain()) {
+                core.notice(`List keychain: ${i}`);
+            }
         }
         catch (ex) {
             core.setFailed(ex.message);
@@ -8124,6 +8202,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 292:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 

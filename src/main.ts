@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as os from 'os'
 import * as tmp from 'tmp'
-import { Keychain } from '@akiojin/keychain'
+import { Keychain, KeychainFile } from '@akiojin/keychain'
 import { BooleanStateValue, StringStateValue } from './StateHelper'
 
 const IsMacOS = os.platform() === 'darwin'
@@ -29,7 +29,8 @@ async function Run()
 			core.setOutput('keychain', keychainPath)
 			core.setOutput('keychain-password', keychainPassword)
 
-			var keychain = await Keychain.CreateKeychain(keychainPath, keychainPassword)
+			const path = await Keychain.CreateKeychain(keychainPath, keychainPassword)
+			var keychain = new KeychainFile(path, keychainPassword)
 			await keychain.SetTimeout(keychainTimeout)
 		}
 		core.endGroup()
@@ -55,9 +56,15 @@ async function Run()
 		}
 		core.endGroup()
 
-		await Keychain.ShowDefaultKeychain()
-		await Keychain.ShowLoginKeychain()
-		await Keychain.ShowListKeychains()
+		for (const i of await Keychain.GetDefaultKeychain()) {
+			core.notice(`Default keychain: ${i}`)
+		}
+		for (const i of await Keychain.GetLoginKeychain()) {
+			core.notice(`Loging keychain: ${i}`)
+		}
+		for (const i of await Keychain.GetListKeychain()) {
+			core.notice(`List keychain: ${i}`)
+		}
 	} catch (ex: any) {
 		core.setFailed(ex.message)
 	}
