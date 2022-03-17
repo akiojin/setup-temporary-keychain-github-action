@@ -7,7 +7,8 @@ import { BooleanStateValue, StringStateValue } from './StateHelper'
 const IsMacOS = os.platform() === 'darwin'
 
 const PostProcess = new BooleanStateValue('IS_POST_PROCESS')
-const KeychainCache = new StringStateValue('KEYCHAIN')
+const TemporaryKeychain = new StringStateValue('TEMPORARY_KEYCHAIN')
+const DefaultKeychainCache = new StringStateValue('DEFAULT_KEYCHAIN')
 
 async function Run()
 {
@@ -25,9 +26,12 @@ async function Run()
 
 		core.startGroup('Create new keychain')
 		{
-			KeychainCache.Set(keychainPath)
+			TemporaryKeychain.Set(keychainPath)
 			core.setOutput('keychain', keychainPath)
 			core.setOutput('keychain-password', keychainPassword)
+
+			const defaultKeychain = await Keychain.GetDefaultKeychain()
+			DefaultKeychainCache.Set(defaultKeychain[0] || Keychain.GetDefaultLoginKeychainPath())
 
 			const path = await Keychain.CreateKeychain(keychainPath, keychainPassword)
 			var keychain = new KeychainFile(path, keychainPassword)
@@ -61,13 +65,13 @@ async function Run()
 		core.endGroup()
 
 		for (const i of await Keychain.GetDefaultKeychain()) {
-			core.notice(`Default keychain: ${i}`)
+			core.info(`Default keychain: ${i}`)
 		}
 		for (const i of await Keychain.GetLoginKeychain()) {
-			core.notice(`Loging keychain: ${i}`)
+			core.info(`Loging keychain: ${i}`)
 		}
 		for (const i of await Keychain.GetListKeychain()) {
-			core.notice(`List keychain: ${i}`)
+			core.info(`List keychain: ${i}`)
 		}
 	} catch (ex: any) {
 		core.setFailed(ex.message)
@@ -79,9 +83,9 @@ async function Cleanup()
 	core.info('Cleanup')
 
 	try {
-		await Keychain.DeleteKeychain(KeychainCache.Get())
-		await Keychain.SetDefaultKeychain(Keychain.GetDefaultLoginKeychainPath())
-		await Keychain.SetListKeychain(Keychain.GetDefaultLoginKeychainPath())
+		await Keychain.DeleteKeychain(TemporaryKeychain.Get())
+		await Keychain.SetDefaultKeychain(DefaultKeychainCache.Get())
+		await Keychain.SetListKeychain(DefaultKeychainCache.Get())
 	} catch (ex: any) {
 		core.setFailed(ex.message)
 	}

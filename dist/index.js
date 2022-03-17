@@ -8088,7 +8088,8 @@ const keychain_1 = __nccwpck_require__(276);
 const StateHelper_1 = __nccwpck_require__(968);
 const IsMacOS = os.platform() === 'darwin';
 const PostProcess = new StateHelper_1.BooleanStateValue('IS_POST_PROCESS');
-const KeychainCache = new StateHelper_1.StringStateValue('KEYCHAIN');
+const TemporaryKeychain = new StateHelper_1.StringStateValue('TEMPORARY_KEYCHAIN');
+const DefaultKeychainCache = new StateHelper_1.StringStateValue('DEFAULT_KEYCHAIN');
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -8101,9 +8102,11 @@ function Run() {
             core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`);
             core.startGroup('Create new keychain');
             {
-                KeychainCache.Set(keychainPath);
+                TemporaryKeychain.Set(keychainPath);
                 core.setOutput('keychain', keychainPath);
                 core.setOutput('keychain-password', keychainPassword);
+                const defaultKeychain = yield keychain_1.Keychain.GetDefaultKeychain();
+                DefaultKeychainCache.Set(defaultKeychain[0] || keychain_1.Keychain.GetDefaultLoginKeychainPath());
                 const path = yield keychain_1.Keychain.CreateKeychain(keychainPath, keychainPassword);
                 var keychain = new keychain_1.KeychainFile(path, keychainPassword);
                 yield keychain.SetTimeout(keychainTimeout);
@@ -8134,13 +8137,13 @@ function Run() {
             }
             core.endGroup();
             for (const i of yield keychain_1.Keychain.GetDefaultKeychain()) {
-                core.notice(`Default keychain: ${i}`);
+                core.info(`Default keychain: ${i}`);
             }
             for (const i of yield keychain_1.Keychain.GetLoginKeychain()) {
-                core.notice(`Loging keychain: ${i}`);
+                core.info(`Loging keychain: ${i}`);
             }
             for (const i of yield keychain_1.Keychain.GetListKeychain()) {
-                core.notice(`List keychain: ${i}`);
+                core.info(`List keychain: ${i}`);
             }
         }
         catch (ex) {
@@ -8152,9 +8155,9 @@ function Cleanup() {
     return __awaiter(this, void 0, void 0, function* () {
         core.info('Cleanup');
         try {
-            yield keychain_1.Keychain.DeleteKeychain(KeychainCache.Get());
-            yield keychain_1.Keychain.SetDefaultKeychain(keychain_1.Keychain.GetDefaultLoginKeychainPath());
-            yield keychain_1.Keychain.SetListKeychain(keychain_1.Keychain.GetDefaultLoginKeychainPath());
+            yield keychain_1.Keychain.DeleteKeychain(TemporaryKeychain.Get());
+            yield keychain_1.Keychain.SetDefaultKeychain(DefaultKeychainCache.Get());
+            yield keychain_1.Keychain.SetListKeychain(DefaultKeychainCache.Get());
         }
         catch (ex) {
             core.setFailed(ex.message);
