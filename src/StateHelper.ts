@@ -13,42 +13,71 @@ export class StateHelper
 	}
 }
 
-export class StringStateValue
+class StateCache
 {
-	key: string = '';
+	#key: string = ''
 
 	constructor(key: string)
 	{
-		this.key = key
+		this.#key = key
+	}
+
+	GetKey(): string
+	{
+		return this.#key
+	}
+}
+
+export class StringStateCache extends StateCache
+{
+	constructor(key: string)
+	{
+		super(key)
 	}
 
 	Set(value: string)
 	{
-		StateHelper.Set(this.key, value)
+		StateHelper.Set(this.GetKey(), value)
 	}
 
 	Get(): string
 	{
-		return StateHelper.Get(this.key)
+		return StateHelper.Get(this.GetKey())
 	}
 }
 
-export class BooleanStateValue
+export class BooleanStateCache extends StateCache
 {
-	key: string = '';
-
 	constructor(key: string)
 	{
-		this.key = key
+		super(key)
 	}
 
 	Set(value: Boolean)
 	{
-		StateHelper.Set(this.key, value.toString())
+		StateHelper.Set(this.GetKey(), value.toString())
 	}
 
 	Get(): Boolean
 	{
-		return !!StateHelper.Get(this.key)
+		return !!StateHelper.Get(this.GetKey())
+	}
+}
+
+export class NumberStateCache extends StateCache
+{
+	constructor(key: string)
+	{
+		super(key)
+	}
+
+	Set(value: number)
+	{
+		StateHelper.Set(this.GetKey(), value.toString())
+	}
+
+	Get(): number
+	{
+		return +StateHelper.Get(this.GetKey())
 	}
 }

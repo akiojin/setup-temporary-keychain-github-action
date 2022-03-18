@@ -8001,8 +8001,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _StateCache_key;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BooleanStateValue = exports.StringStateValue = exports.StateHelper = void 0;
+exports.NumberStateCache = exports.BooleanStateCache = exports.StringStateCache = exports.StateHelper = void 0;
 const coreCommand = __importStar(__nccwpck_require__(403));
 class StateHelper {
     static Set(key, value) {
@@ -8013,32 +8025,52 @@ class StateHelper {
     }
 }
 exports.StateHelper = StateHelper;
-class StringStateValue {
+class StateCache {
     constructor(key) {
-        this.key = '';
-        this.key = key;
+        _StateCache_key.set(this, '');
+        __classPrivateFieldSet(this, _StateCache_key, key, "f");
     }
-    Set(value) {
-        StateHelper.Set(this.key, value);
-    }
-    Get() {
-        return StateHelper.Get(this.key);
+    GetKey() {
+        return __classPrivateFieldGet(this, _StateCache_key, "f");
     }
 }
-exports.StringStateValue = StringStateValue;
-class BooleanStateValue {
+_StateCache_key = new WeakMap();
+class StringStateCache extends StateCache {
     constructor(key) {
-        this.key = '';
-        this.key = key;
+        super(key);
     }
     Set(value) {
-        StateHelper.Set(this.key, value.toString());
+        StateHelper.Set(this.GetKey(), value);
     }
     Get() {
-        return !!StateHelper.Get(this.key);
+        return StateHelper.Get(this.GetKey());
     }
 }
-exports.BooleanStateValue = BooleanStateValue;
+exports.StringStateCache = StringStateCache;
+class BooleanStateCache extends StateCache {
+    constructor(key) {
+        super(key);
+    }
+    Set(value) {
+        StateHelper.Set(this.GetKey(), value.toString());
+    }
+    Get() {
+        return !!StateHelper.Get(this.GetKey());
+    }
+}
+exports.BooleanStateCache = BooleanStateCache;
+class NumberStateCache extends StateCache {
+    constructor(key) {
+        super(key);
+    }
+    Set(value) {
+        StateHelper.Set(this.GetKey(), value.toString());
+    }
+    Get() {
+        return +StateHelper.Get(this.GetKey());
+    }
+}
+exports.NumberStateCache = NumberStateCache;
 
 
 /***/ }),
@@ -8087,9 +8119,9 @@ const tmp = __importStar(__nccwpck_require__(92));
 const keychain_1 = __nccwpck_require__(119);
 const StateHelper_1 = __nccwpck_require__(635);
 const IsMacOS = os.platform() === 'darwin';
-const PostProcess = new StateHelper_1.BooleanStateValue('IS_POST_PROCESS');
-const TemporaryKeychain = new StateHelper_1.StringStateValue('TEMPORARY_KEYCHAIN');
-const DefaultKeychainCache = new StateHelper_1.StringStateValue('DEFAULT_KEYCHAIN');
+const PostProcess = new StateHelper_1.BooleanStateCache('IS_POST_PROCESS');
+const TemporaryKeychain = new StateHelper_1.StringStateCache('TEMPORARY_KEYCHAIN');
+const DefaultKeychainCache = new StateHelper_1.StringStateCache('DEFAULT_KEYCHAIN');
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -8098,44 +8130,37 @@ function Run() {
             const keychainTimeout = +core.getInput('keychain-timeout');
             core.setSecret(keychainPassword);
             const keychainPath = keychainName === '' ? `${tmp.tmpNameSync()}.keychain-db` : keychain_1.Keychain.GenerateKeychainPath(keychainName);
-            core.info('setup-temporary-keychain parameters:');
-            core.info(`keychain-name=${keychainName}, keychain-password=${keychainPassword}, keychain-timeout=${keychainTimeout}`);
             core.startGroup('Create new keychain');
-            {
-                TemporaryKeychain.Set(keychainPath);
-                core.setOutput('keychain', keychainPath);
-                core.setOutput('keychain-password', keychainPassword);
-                const defaultKeychain = yield keychain_1.Keychain.GetDefaultKeychain();
-                DefaultKeychainCache.Set(defaultKeychain[0] || keychain_1.Keychain.GetDefaultLoginKeychainPath());
-                const path = yield keychain_1.Keychain.CreateKeychain(keychainPath, keychainPassword);
-                var keychain = new keychain_1.KeychainFile(path, keychainPassword);
-                yield keychain.SetTimeout(keychainTimeout);
-            }
+            TemporaryKeychain.Set(keychainPath);
+            core.setOutput('keychain', keychainPath);
+            core.setOutput('keychain-password', keychainPassword);
+            var keychain = new keychain_1.KeychainFile(yield keychain_1.Keychain.CreateKeychain(keychainPath, keychainPassword), keychainPassword);
+            yield keychain.SetTimeout(keychainTimeout);
             core.endGroup();
             core.startGroup('Setup options');
-            {
-                if (!!core.getBooleanInput('lock-keychain')) {
-                    core.info('lock-keychain');
-                    yield keychain.Lock();
-                }
-                if (!!core.getBooleanInput('default-keychain')) {
-                    core.info('default-keychain');
-                    yield keychain.SetDefault();
-                    yield keychain.SetList();
-                }
-                if (!!core.getBooleanInput('login-keychain')) {
-                    core.info('login-keychain');
-                    yield keychain.SetLogin();
-                }
-                if (!!core.getBooleanInput('append-keychain')) {
-                    core.info('append-keychain');
-                    yield keychain_1.Keychain.SetListKeychains([
-                        keychain_1.Keychain.GetDefaultLoginKeychainPath(),
-                        keychainPath
-                    ]);
-                }
+            if (!!core.getBooleanInput('lock-keychain')) {
+                core.info('Setting: lock-keychain');
+                yield keychain.Lock();
+            }
+            if (!!core.getBooleanInput('default-keychain')) {
+                core.info('Setting: default-keychain');
+                const defaultKeychain = yield keychain_1.Keychain.GetDefaultKeychain();
+                DefaultKeychainCache.Set(defaultKeychain[0] || keychain_1.Keychain.GetDefaultLoginKeychainPath());
+                yield keychain.SetDefault();
+                yield keychain.SetList();
+            }
+            if (!!core.getBooleanInput('login-keychain')) {
+                core.info('Setting: login-keychain');
+                yield keychain.SetLogin();
+            }
+            if (!!core.getBooleanInput('append-keychain')) {
+                core.info('Setting: append-keychain');
+                const temp = yield keychain_1.Keychain.GetListKeychain();
+                temp.push(keychainPath);
+                yield keychain_1.Keychain.SetListKeychains(temp);
             }
             core.endGroup();
+            core.startGroup('Show Keychains');
             for (const i of yield keychain_1.Keychain.GetDefaultKeychain()) {
                 core.info(`Default keychain: ${i}`);
             }
@@ -8145,6 +8170,7 @@ function Run() {
             for (const i of yield keychain_1.Keychain.GetListKeychain()) {
                 core.info(`List keychain: ${i}`);
             }
+            core.endGroup();
         }
         catch (ex) {
             core.setFailed(ex.message);
@@ -8156,8 +8182,10 @@ function Cleanup() {
         core.info('Cleanup');
         try {
             yield keychain_1.Keychain.DeleteKeychain(TemporaryKeychain.Get());
-            yield keychain_1.Keychain.SetDefaultKeychain(DefaultKeychainCache.Get());
-            yield keychain_1.Keychain.SetListKeychain(DefaultKeychainCache.Get());
+            if (DefaultKeychainCache.Get() !== '') {
+                yield keychain_1.Keychain.SetDefaultKeychain(DefaultKeychainCache.Get());
+                yield keychain_1.Keychain.SetListKeychain(DefaultKeychainCache.Get());
+            }
         }
         catch (ex) {
             core.setFailed(ex.message);

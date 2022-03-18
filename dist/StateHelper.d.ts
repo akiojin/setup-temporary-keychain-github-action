@@ -2,15 +2,24 @@ export declare class StateHelper {
     static Set(key: string, value: string): void;
     static Get(key: string): string;
 }
-export declare class StringStateValue {
-    key: string;
+declare class StateCache {
+    #private;
+    constructor(key: string);
+    GetKey(): string;
+}
+export declare class StringStateCache extends StateCache {
     constructor(key: string);
     Set(value: string): void;
     Get(): string;
 }
-export declare class BooleanStateValue {
-    key: string;
+export declare class BooleanStateCache extends StateCache {
     constructor(key: string);
     Set(value: Boolean): void;
     Get(): Boolean;
 }
+export declare class NumberStateCache extends StateCache {
+    constructor(key: string);
+    Set(value: number): void;
+    Get(): number;
+}
+export {};
