@@ -5,17 +5,21 @@ on:
     branches:
       - main
 
+env:
+  TIMEOUT: 5
+  NODE_VERSION: 16
+
 jobs:
   Build:
     runs-on: macos-latest
-    timeout-minutes: 5
+    timeout-minutes: ${{ env.TIMEOUT }}
 
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '17'
+          node-version: ${{ env.NODE_VERSION }}
 
       - run: npm install
 
@@ -26,14 +30,14 @@ jobs:
   Test:
     runs-on: macos-latest
     needs: Build
-    timeout-minutes: 5
+    timeout-minutes: ${{ env.TIMEOUT }}
 
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-node@v2
         with:
-          node-version: '17'
+          node-version: ${{ env.NODE_VERSION }}
 
       - run: npm install
 
