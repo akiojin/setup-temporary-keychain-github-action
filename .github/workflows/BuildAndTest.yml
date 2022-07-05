@@ -6,7 +6,6 @@ on:
       - main
 
 env:
-  TIMEOUT: 5
   NODE_VERSION: 16
 
 jobs:
