@@ -1,6 +1,6 @@
 import * as coreCommand from '@actions/core/lib/command'
 
-export class StateHelper
+export class ActionStateHelper
 {
 	static Set(key: string, value: string): void
 	{
@@ -13,7 +13,7 @@ export class StateHelper
 	}
 }
 
-class StateCache
+class ActionStateCache
 {
 	#key: string = ''
 
@@ -28,7 +28,7 @@ class StateCache
 	}
 }
 
-export class StringStateCache extends StateCache
+export class StringStateCache extends ActionStateCache
 {
 	constructor(key: string)
 	{
@@ -37,16 +37,16 @@ export class StringStateCache extends StateCache
 
 	Set(value: string)
 	{
-		StateHelper.Set(this.GetKey(), value)
+		ActionStateHelper.Set(this.GetKey(), value)
 	}
 
 	Get(): string
 	{
-		return StateHelper.Get(this.GetKey())
+		return ActionStateHelper.Get(this.GetKey())
 	}
 }
 
-export class BooleanStateCache extends StateCache
+export class BooleanStateCache extends ActionStateCache
 {
 	constructor(key: string)
 	{
@@ -55,16 +55,16 @@ export class BooleanStateCache extends StateCache
 
 	Set(value: Boolean)
 	{
-		StateHelper.Set(this.GetKey(), value.toString())
+		ActionStateHelper.Set(this.GetKey(), value.toString())
 	}
 
 	Get(): Boolean
 	{
-		return !!StateHelper.Get(this.GetKey())
+		return !!ActionStateHelper.Get(this.GetKey())
 	}
 }
 
-export class NumberStateCache extends StateCache
+export class NumberStateCache extends ActionStateCache
 {
 	constructor(key: string)
 	{
@@ -73,11 +73,11 @@ export class NumberStateCache extends StateCache
 
 	Set(value: number)
 	{
-		StateHelper.Set(this.GetKey(), value.toString())
+		ActionStateHelper.Set(this.GetKey(), value.toString())
 	}
 
 	Get(): number
 	{
-		return +StateHelper.Get(this.GetKey())
+		return +ActionStateHelper.Get(this.GetKey())
 	}
 }

@@ -19,7 +19,7 @@ async function Run()
 
 		core.setSecret(keychainPassword)
 
-		const keychainPath = keychainName === '' ? `${tmp.tmpNameSync()}.keychain-db` : Keychain.GenerateKeychainPath(keychainName)
+		const keychainPath = !keychainName ? `${tmp.tmpNameSync()}.keychain-db` : Keychain.GenerateKeychainPath(keychainName)
 
 		core.startGroup('Create new keychain')
 		TemporaryKeychain.Set(keychainPath)
@@ -84,12 +84,10 @@ async function Run()
 
 async function Cleanup()
 {
-	core.info('Cleanup')
-
 	try {
 		await Keychain.DeleteKeychain(TemporaryKeychain.Get())
 
-		if (DefaultKeychainCache.Get() !== '') {
+		if (!!DefaultKeychainCache.Get()) {
 			await Keychain.SetDefaultKeychain(DefaultKeychainCache.Get())
 			await Keychain.SetListKeychain(DefaultKeychainCache.Get())
 		}
