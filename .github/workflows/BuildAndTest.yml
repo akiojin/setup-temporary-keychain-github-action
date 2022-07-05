@@ -25,6 +25,7 @@ jobs:
 
   Test:
     runs-on: macos-latest
+    needs: Build
     timeout-minutes: 5
 
     steps:
