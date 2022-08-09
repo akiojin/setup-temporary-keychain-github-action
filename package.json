@@ -33,7 +33,7 @@
     "@akiojin/keychain": "^0.2.7"
   },
   "devDependencies": {
-    "@types/node": "^18.6.4",
+    "@types/node": "^18.6.5",
     "@types/tmp": "^0.2.3",
     "tmp": "^0.2.1"
   }
