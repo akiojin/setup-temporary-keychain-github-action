@@ -1,6 +1,6 @@
 {
   "name": "setup-temporary-keychain-github-action",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "private": true,
   "description": "This action ",
   "main": "dist/index.js",
