@@ -2,13 +2,13 @@ import * as core from '@actions/core'
 import * as os from 'os'
 import * as tmp from 'tmp'
 import { Keychain, KeychainFile } from '@akiojin/keychain'
-import { BooleanStateCache, StringStateCache } from './StateHelper'
+import { BooleanEnvironment, StringEnvironment } from './Environment'
 
 const IsMacOS = os.platform() === 'darwin'
 
-const PostProcess = new BooleanStateCache('IS_POST_PROCESS')
-const TemporaryKeychain = new StringStateCache('TEMPORARY_KEYCHAIN')
-const DefaultKeychainCache = new StringStateCache('DEFAULT_KEYCHAIN')
+const PostProcess = new BooleanEnvironment('IS_POST_PROCESS')
+const TemporaryKeychain = new StringEnvironment('TEMPORARY_KEYCHAIN')
+const DefaultKeychainCache = new StringEnvironment('DEFAULT_KEYCHAIN')
 
 async function Run()
 {

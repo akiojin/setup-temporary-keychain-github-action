@@ -9107,7 +9107,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 4990:
+/***/ 6244:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -9146,65 +9146,56 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _ActionStateCache_key;
+var _Environement_key;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.NumberStateCache = exports.BooleanStateCache = exports.StringStateCache = exports.ActionStateHelper = void 0;
-const command = __importStar(__nccwpck_require__(7647));
-class ActionStateHelper {
-    static Set(key, value) {
-        command.issueFileCommand(key, value);
-    }
-    static Get(key) {
-        return process.env[`GITHUB_${key}`] || '';
-    }
-}
-exports.ActionStateHelper = ActionStateHelper;
-class ActionStateCache {
+exports.NumberEnvironment = exports.BooleanEnvironment = exports.StringEnvironment = void 0;
+const core = __importStar(__nccwpck_require__(2810));
+class Environement {
     constructor(key) {
-        _ActionStateCache_key.set(this, '');
-        __classPrivateFieldSet(this, _ActionStateCache_key, key, "f");
+        _Environement_key.set(this, '');
+        __classPrivateFieldSet(this, _Environement_key, key, "f");
     }
     GetKey() {
-        return __classPrivateFieldGet(this, _ActionStateCache_key, "f");
+        return __classPrivateFieldGet(this, _Environement_key, "f");
     }
 }
-_ActionStateCache_key = new WeakMap();
-class StringStateCache extends ActionStateCache {
+_Environement_key = new WeakMap();
+class StringEnvironment extends Environement {
     constructor(key) {
         super(key);
     }
     Set(value) {
-        ActionStateHelper.Set(this.GetKey(), value);
+        core.saveState(this.GetKey(), value);
     }
     Get() {
-        return ActionStateHelper.Get(this.GetKey());
+        return core.getState(this.GetKey());
     }
 }
-exports.StringStateCache = StringStateCache;
-class BooleanStateCache extends ActionStateCache {
+exports.StringEnvironment = StringEnvironment;
+class BooleanEnvironment extends Environement {
     constructor(key) {
         super(key);
     }
     Set(value) {
-        ActionStateHelper.Set(this.GetKey(), value.toString());
+        core.saveState(this.GetKey(), value.toString());
     }
     Get() {
-        return !!ActionStateHelper.Get(this.GetKey());
+        return !!core.getState(this.GetKey());
     }
 }
-exports.BooleanStateCache = BooleanStateCache;
-class NumberStateCache extends ActionStateCache {
+exports.BooleanEnvironment = BooleanEnvironment;
+class NumberEnvironment extends Environement {
     constructor(key) {
         super(key);
     }
     Set(value) {
-        ActionStateHelper.Set(this.GetKey(), value.toString());
+        core.saveState(this.GetKey(), value.toString());
     }
     Get() {
-        return +ActionStateHelper.Get(this.GetKey());
+        return +core.getState(this.GetKey());
     }
 }
-exports.NumberStateCache = NumberStateCache;
+exports.NumberEnvironment = NumberEnvironment;
 
 
 /***/ }),
@@ -9251,11 +9242,11 @@ const core = __importStar(__nccwpck_require__(2810));
 const os = __importStar(__nccwpck_require__(2037));
 const tmp = __importStar(__nccwpck_require__(4566));
 const keychain_1 = __nccwpck_require__(5526);
-const StateHelper_1 = __nccwpck_require__(4990);
+const Environment_1 = __nccwpck_require__(6244);
 const IsMacOS = os.platform() === 'darwin';
-const PostProcess = new StateHelper_1.BooleanStateCache('IS_POST_PROCESS');
-const TemporaryKeychain = new StateHelper_1.StringStateCache('TEMPORARY_KEYCHAIN');
-const DefaultKeychainCache = new StateHelper_1.StringStateCache('DEFAULT_KEYCHAIN');
+const PostProcess = new Environment_1.BooleanEnvironment('IS_POST_PROCESS');
+const TemporaryKeychain = new Environment_1.StringEnvironment('TEMPORARY_KEYCHAIN');
+const DefaultKeychainCache = new Environment_1.StringEnvironment('DEFAULT_KEYCHAIN');
 function Run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
