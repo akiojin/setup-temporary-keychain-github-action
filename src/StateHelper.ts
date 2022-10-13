@@ -1,15 +1,15 @@
-import * as coreCommand from '@actions/core/lib/command'
+import * as command from '@actions/core/lib/file-command'
 
 export class ActionStateHelper
 {
 	static Set(key: string, value: string): void
 	{
-		coreCommand.issueCommand('save-state', { name: key }, value)
+		command.issueFileCommand(key, value)
 	}
 
 	static Get(key: string): string
 	{
-		return process.env[`STATE_${key}`] || '';
+		return process.env[`GITHUB_${key}`] || '';
 	}
 }
 
