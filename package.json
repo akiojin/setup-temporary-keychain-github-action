@@ -1,19 +1,12 @@
 {
-  "name": "setup-temporary-keychain-github-action",
+  "name": "@akiojin/setup-temporary-keychain-github-action",
   "version": "2.3.0",
-  "private": true,
-  "description": "This action ",
+  "description": "Create a new temporary keychain that is valid in the workflow",
   "main": "dist/index.js",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akiojin/setup-temporary-keychain-github-action.git"
+    "url": "https://github.com/akiojin/setup-temporary-keychain-github-action.git"
   },
   "keywords": [
     "actions",
@@ -21,7 +14,7 @@
     "setup",
     "xcode"
   ],
-  "author": "akiojin",
+  "author": "Akio Jinsenji <akio-jinsenji@cloud-creative-studios.com> (https://github.com/akiojin)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/akiojin/setup-temporary-keychain-github-action/issues"
