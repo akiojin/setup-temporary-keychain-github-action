@@ -9,8 +9,6 @@
     "url": "https://github.com/akiojin/setup-temporary-keychain-github-action.git"
   },
   "keywords": [
-    "actions",
-    "node",
     "setup",
     "xcode"
   ],
