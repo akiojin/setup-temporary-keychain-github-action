@@ -1,4 +1,4 @@
-name: 'Setup Temporary Keychain GitHub action'
+name: 'Setup Temporary Keychain'
 description: 'Create a new temporary keychain that is valid in the workflow'
 inputs:
   keychain-name:
