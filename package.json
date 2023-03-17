@@ -3,7 +3,10 @@
   "version": "2.3.2",
   "description": "Create a new temporary keychain that is valid in the workflow",
   "main": "dist/index.js",
-  "private": true,
+  "scripts": {
+    "build": "npm install && ncc build src/main.ts -o dist --license licenses.txt",
+    "clean": "rimraf dist && rimraf node_modules && npm cache clean --force"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/akiojin/setup-temporary-keychain-github-action.git"
@@ -18,14 +21,19 @@
     "url": "https://github.com/akiojin/setup-temporary-keychain-github-action/issues"
   },
   "homepage": "https://github.com/akiojin/setup-temporary-keychain-github-action#readme",
-  "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/exec": "^1.1.1",
-    "@akiojin/keychain": "^0.2.7"
-  },
   "devDependencies": {
-    "@types/node": "^18.14.6",
+    "@actions/core": "1.10.0",
+    "@actions/exec": "1.1.1",
+    "@akiojin/keychain": "1.0.0",
+    "@commitlint/cli": "17.4.4",
+    "@commitlint/config-conventional": "17.4.4",
+    "@types/node": "18.15.3",
     "@types/tmp": "^0.2.3",
-    "tmp": "^0.2.1"
-  }
+    "@vercel/ncc": "0.36.1",
+    "husky": "8.0.3",
+    "rimraf": "4.4.0",
+    "tmp": "^0.2.1",
+    "typescript": "5.0.2"
+  },
+  "private": true
 }
