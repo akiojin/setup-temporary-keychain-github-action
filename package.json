@@ -30,7 +30,7 @@
     "@akiojin/keychain": "1.0.0",
     "@types/node": "20.10.6",
     "@types/tmp": "^0.2.3",
-    "@vercel/ncc": "0.38.1",
+    "@vercel/ncc": "0.38.3",
     "rimraf": "5.0.5",
     "typescript": "5.3.3"
   },
