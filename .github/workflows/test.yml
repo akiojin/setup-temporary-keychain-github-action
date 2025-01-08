@@ -1,29 +1,20 @@
-name: Build
+name: Test
 
-on: push
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
 
 jobs:
-  Build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
-      - run: npm run build
-
   Test:
     runs-on: macos-latest
-    needs: Build
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
+      - uses: actions/checkout@v4
       - uses: ./
         id: setup-temporary-keychain
       - name: Output result
