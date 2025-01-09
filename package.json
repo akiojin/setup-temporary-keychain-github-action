@@ -1,6 +1,6 @@
 {
   "name": "@akiojin/setup-temporary-keychain-github-action",
-  "version": "2.3.5",
+  "version": "2.3.6",
   "description": "Create a new temporary keychain that is valid in the workflow",
   "main": "dist/index.js",
   "scripts": {
