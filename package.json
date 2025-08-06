@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/akiojin/setup-temporary-keychain-github-action#readme",
   "dependencies": {
-    "tmp": "0.2.3"
+    "tmp": "0.2.4"
   },
   "devDependencies": {
     "@actions/core": "1.11.1",
